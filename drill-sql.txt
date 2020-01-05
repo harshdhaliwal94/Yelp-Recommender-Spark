@@ -1,0 +1,17 @@
+CREATE TABLE yelp_business AS SELECT business_id, name as business_name, address, city, state, postal_code, latitude, longitude, stars, review_count, categories FROM dfs.`C:\Users\Parth\Desktop\yelp\data\business.json` where regexp_matches(categories,'.*Restaurant.*') and city='Toronto';
+
+CREATE TABLE yelp_review AS SELECT review_id , user_id , business_id , stars , `date` review_date, REGEXP_REPLACE(text,'\n', ' ') review_text, useful , funny , cool FROM dfs.`C:\Users\Parth\Desktop\yelp\data\review.json` WHERE business_id  IN (SELECT business_id  FROM dfs.`C:\Users\Parth\Desktop\yelp\data\business.json` WHERE regexp_matches(categories,'.*Restaurant.*') and city='Toronto');
+
+CREATE TABLE yelp_users AS SELECT user_id , name as user_name, review_count , yelping_since , 
+ useful , fans , average_stars FROM dfs.`C:\Users\Parth\Desktop\yelp\data\user.json`
+WHERE user_id  IN ( SELECT user_id  FROM yelp_review   
+WHERE business_id  IN ( SELECT business_id  FROM yelp_business));
+
+CREATE TABLE yelp_friends AS
+SELECT user_id , friends as friend_id
+FROM dfs.`C:\Users\Parth\Desktop\yelp\Data\user.json`
+WHERE user_id  IN (
+SELECT user_id  FROM dfs.`C:\Users\Parth\Desktop\yelp\Data\review.json`   
+WHERE business_id  IN (
+SELECT business_id  FROM dfs.`C:\Users\Parth\Desktop\yelp\Data\business.json`  
+WHERE regexp_matches(categories,'.*Restaurant.*') and city='Toronto'));
